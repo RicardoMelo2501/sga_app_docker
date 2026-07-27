@@ -1,0 +1,214 @@
+{% extends "admin.html.twig" %}
+
+{% block adminContent %}
+    <h1>
+        {{ 'admin.paineis.title'|trans }}
+        <small>
+            {{ 'admin.paineis.subtitle'|trans }}
+        </small>
+    </h1>
+
+    <hr>
+
+    <div id="admin">
+        <fieldset>
+            <legend>{{ 'admin.paineis.list.title'|trans }}</legend>
+
+            <p>{{ 'admin.paineis.list.subtitle'|trans }}</p>
+
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>{{ 'admin.paineis.field.nome'|trans }}</th>
+                        <th>{{ 'admin.paineis.field.unidade'|trans }}</th>
+                        <th>{{ 'admin.paineis.field.url'|trans }}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody v-cloak>
+                    <tr v-for="painel in paineis">
+                        {% verbatim %}
+                        <td>{{ painel.nome }}</td>
+                        <td>{{ painel.unidade ? painel.unidade.nome : '' }}</td>
+                        <td>
+                            <code>painel/{{ painel.id }}</code>
+                            <a href="#" v-on:click.prevent="copyUrl(painel)" title="{{ 'label.copy'|trans }}">
+                                <span class="fa fa-copy"></span>
+                            </a>
+                        </td>
+                        {% endverbatim %}
+                        <td class="text-center">
+                            <button type="button" class="btn btn-danger" title="{{ 'button.remove'|trans }}"
+                                    v-on:click.prevent="removePainel(painel)">
+                                <span class="fa fa-trash"></span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-secondary" v-on:click.prevent="newPainel">
+                                <i class="fa fa-plus"></i>
+                                {{ 'button.add'|trans }}
+                            </button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </fieldset>
+
+        <div id="dialog-painel" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form v-on:submit.prevent="addPainel">
+                        <div class="modal-header">
+                            <h5 class="modal-title">{{ 'admin.paineis.modal.title'|trans }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>{{ 'admin.paineis.field.nome'|trans }}</label>
+                                <input type="text" class="form-control" v-model="painel.nome" maxlength="100" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>{{ 'admin.paineis.field.unidade'|trans }}</label>
+                                <select class="form-control" v-model="painel.unidade" v-on:change="loadServicos" required>
+                                    <option value=""></option>
+                                    {% verbatim %}
+                                    <option v-for="unidade in unidades" v-bind:value="unidade.id">{{ unidade.nome }}</option>
+                                    {% endverbatim %}
+                                </select>
+                            </div>
+
+                            <div class="form-group" v-if="servicos.length">
+                                <label>{{ 'admin.paineis.field.servicos'|trans }}</label>
+                                <div class="form-check" v-for="servico in servicos" v-bind:key="servico.servico.id">
+                                    {% verbatim %}
+                                    <label class="form-check-label">
+                                        <input type="checkbox" class="form-check-input" v-bind:value="servico.servico.id" v-model="painel.servicos">
+                                        {{ servico.sigla }} - {{ servico.servico.nome }}
+                                    </label>
+                                    {% endverbatim %}
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <p class="text-muted">{{ 'admin.paineis.field.credentials_hint'|trans }}</p>
+
+                            <div class="form-group">
+                                <label>{{ 'admin.paineis.field.username'|trans }}</label>
+                                <input type="text" class="form-control" v-model="painel.username" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>{{ 'admin.paineis.field.password'|trans }}</label>
+                                <input type="password" class="form-control" v-model="painel.password" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                {{ 'button.close'|trans }}
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                {{ 'button.add'|trans }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (function () {
+            'use strict'
+
+            var app = new Vue({
+                el: '#admin',
+                data: {
+                    painel: {},
+                    paineis: [],
+                    unidades: {{ unidades|json_encode|raw }},
+                    servicos: []
+                },
+                methods: {
+                    load: function () {
+                        var self = this
+                        App.ajax({
+                            url: '{{ path('admin_paineis_list') }}',
+                            success: function (response) {
+                                self.paineis = response.data
+                            }
+                        })
+                    },
+                    newPainel: function () {
+                        this.painel = { servicos: [] }
+                        this.servicos = []
+                        $('#dialog-painel').modal('show')
+                    },
+                    loadServicos: function () {
+                        var self = this
+                        self.painel.servicos = []
+                        self.servicos = []
+
+                        if (!self.painel.unidade) {
+                            return
+                        }
+
+                        App.ajax({
+                            url: '{{ path('admin_paineis_index') }}api/unidades/' + self.painel.unidade + '/servicos',
+                            success: function (response) {
+                                self.servicos = response.data
+                            }
+                        })
+                    },
+                    addPainel: function () {
+                        var self = this
+                        App.ajax({
+                            url: '{{ path('admin_paineis_new') }}',
+                            type: 'POST',
+                            data: self.painel,
+                            success: function () {
+                                self.load()
+                                $('#dialog-painel').modal('hide')
+                            }
+                        })
+                    },
+                    removePainel: function (painel) {
+                        var self = this
+                        if (confirm('{{ 'admin.paineis.remove_alert'|trans }}')) {
+                            App.ajax({
+                                url: '{{ path('admin_paineis_list') }}/' + painel.id,
+                                type: 'DELETE',
+                                success: function () {
+                                    self.load()
+                                }
+                            })
+                        }
+                    },
+                    copyUrl: function (painel) {
+                        var input = document.createElement('input')
+                        input.value = 'painel/' + painel.id
+                        document.body.appendChild(input)
+                        input.select()
+                        document.execCommand('copy')
+                        document.body.removeChild(input)
+                    }
+                }
+            })
+
+            app.load()
+        })()
+    </script>
+{% endblock %}

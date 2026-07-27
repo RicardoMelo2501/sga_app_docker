@@ -598,6 +598,66 @@
                 <source>label.notes</source>
                 <target>Observação</target>
             </trans-unit>
+            <trans-unit id="label.copy">
+                <source>label.copy</source>
+                <target>Copiar</target>
+            </trans-unit>
+            <trans-unit id="admin.menu.paineis">
+                <source>admin.menu.paineis</source>
+                <target>Painéis</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.title">
+                <source>admin.paineis.title</source>
+                <target>Painéis</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.subtitle">
+                <source>admin.paineis.subtitle</source>
+                <target>Gere painéis (TVs) já configurados, sem precisar digitar nada no dispositivo</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.list.title">
+                <source>admin.paineis.list.title</source>
+                <target>Painéis gerados</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.list.subtitle">
+                <source>admin.paineis.list.subtitle</source>
+                <target>Acesse o endereço abaixo no aplicativo do painel para que ele se configure sozinho</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.nome">
+                <source>admin.paineis.field.nome</source>
+                <target>Nome</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.unidade">
+                <source>admin.paineis.field.unidade</source>
+                <target>Unidade</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.servicos">
+                <source>admin.paineis.field.servicos</source>
+                <target>Serviços</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.url">
+                <source>admin.paineis.field.url</source>
+                <target>Endereço do painel</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.username">
+                <source>admin.paineis.field.username</source>
+                <target>Usuário</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.password">
+                <source>admin.paineis.field.password</source>
+                <target>Senha</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.credentials_hint">
+                <source>admin.paineis.field.credentials_hint</source>
+                <target>Essas credenciais são usadas apenas uma vez, para autorizar o painel. Elas não ficam salvas no sistema.</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.modal.title">
+                <source>admin.paineis.modal.title</source>
+                <target>Novo painel</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.remove_alert">
+                <source>admin.paineis.remove_alert</source>
+                <target>Deseja realmente remover este painel? O dispositivo que o utiliza perderá o acesso imediatamente.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

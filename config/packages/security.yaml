@@ -28,6 +28,10 @@ security:
            pattern:    ^/api/pareamento
            security:   false
 
+        paineis_display:
+           pattern:    ^/api/paineis
+           security:   false
+
         api:
            pattern:    ^/(api|\w+\.\w+/api)
            fos_oauth:  true

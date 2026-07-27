@@ -738,6 +738,66 @@
                 <source>label.notes</source>
                 <target>Notes</target>
             </trans-unit>
+            <trans-unit id="label.copy">
+                <source>label.copy</source>
+                <target>Copy</target>
+            </trans-unit>
+            <trans-unit id="admin.menu.paineis">
+                <source>admin.menu.paineis</source>
+                <target>Panels</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.title">
+                <source>admin.paineis.title</source>
+                <target>Panels</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.subtitle">
+                <source>admin.paineis.subtitle</source>
+                <target>Generate already-configured panels (TVs), no typing required on the device</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.list.title">
+                <source>admin.paineis.list.title</source>
+                <target>Generated panels</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.list.subtitle">
+                <source>admin.paineis.list.subtitle</source>
+                <target>Open the address below in the panel app so it configures itself automatically</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.nome">
+                <source>admin.paineis.field.nome</source>
+                <target>Name</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.unidade">
+                <source>admin.paineis.field.unidade</source>
+                <target>Unity</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.servicos">
+                <source>admin.paineis.field.servicos</source>
+                <target>Services</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.url">
+                <source>admin.paineis.field.url</source>
+                <target>Panel address</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.username">
+                <source>admin.paineis.field.username</source>
+                <target>Username</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.password">
+                <source>admin.paineis.field.password</source>
+                <target>Password</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.field.credentials_hint">
+                <source>admin.paineis.field.credentials_hint</source>
+                <target>These credentials are used only once, to authorize the panel. They are not stored anywhere.</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.modal.title">
+                <source>admin.paineis.modal.title</source>
+                <target>New panel</target>
+            </trans-unit>
+            <trans-unit id="admin.paineis.remove_alert">
+                <source>admin.paineis.remove_alert</source>
+                <target>Do you really want to remove this panel? The device using it will immediately lose access.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

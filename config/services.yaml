@@ -68,6 +68,8 @@ services:
 
     
     Doctrine\Persistence\ObjectManager: '@Doctrine\ORM\EntityManagerInterface'
+
+    OAuth2\OAuth2: '@fos_oauth_server.server'
     
     # novosga core services
     Novosga\Service\:

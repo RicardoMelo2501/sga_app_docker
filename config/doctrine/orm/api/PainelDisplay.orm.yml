@@ -1,0 +1,26 @@
+App\Entity\PainelDisplay:
+    type: entity
+    table: painel_displays
+    id:
+        id:
+            type: string
+            length: 32
+    fields:
+        nome:
+            type: string
+            length: 100
+        servicos:
+            type: json
+        refreshToken:
+            type: string
+            length: 255
+            column: refresh_token
+        criadoEm:
+            type: datetime
+            column: criado_em
+    manyToOne:
+        unidade:
+            targetEntity: Novosga\Entity\Unidade
+            joinColumns:
+                unidade_id:
+                    referencedColumnName: id
