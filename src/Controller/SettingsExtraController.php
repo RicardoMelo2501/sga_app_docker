@@ -60,8 +60,30 @@ class SettingsExtraController extends AbstractController
             }
         }
 
+        // devolve a lista atualizada de serviços do atendente, no mesmo
+        // formato usado no carregamento inicial da página, para o
+        // front-end atualizar a tela sem precisar recarregar
+        $servicosUsuario = $em
+            ->getRepository(ServicoUsuario::class)
+            ->getAll($usuario, $unidade);
+
+        $data = [];
+
+        foreach ($servicosUnidade as $servicoUnidade) {
+            foreach ($servicosUsuario as $servicoUsuario) {
+                if ($servicoUnidade->getServico()->getId() === $servicoUsuario->getServico()->getId()) {
+                    $data[] = [
+                        'id' => $servicoUnidade->getServico()->getId(),
+                        'sigla' => $servicoUnidade->getSigla(),
+                        'nome' => $servicoUnidade->getServico()->getNome(),
+                        'peso' => $servicoUsuario->getPeso(),
+                    ];
+                }
+            }
+        }
+
         $envelope = new Envelope();
-        $envelope->setData(true);
+        $envelope->setData($data);
 
         return $this->json($envelope);
     }

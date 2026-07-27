@@ -459,7 +459,23 @@
                 if (!response.ok) {
                     throw new Error('HTTP ' + response.status)
                 }
-                window.location.reload()
+                return response.json()
+            }).then(function (envelope) {
+                if (!envelope.success) {
+                    throw new Error(envelope.message || 'erro desconhecido')
+                }
+
+                // atualiza a instância Vue já montada na página (sem reload)
+                var vm = document.getElementById('settings').__vue__
+                var usuario = vm && vm.usuarios.find(function (u) {
+                    return u.id === usuarioId
+                })
+
+                if (usuario) {
+                    usuario.servicos = envelope.data
+                }
+
+                btn.disabled = false
             }).catch(function (e) {
                 alert('{% trans %}Não foi possível vincular os serviços.{% endtrans %} (' + e.message + ')')
                 btn.disabled = false
