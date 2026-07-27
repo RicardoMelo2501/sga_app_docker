@@ -28,9 +28,11 @@ class DefaultController extends AbstractController
     /**
      * @Route("/", name="home")
      */
-    public function index(Request $request)
+    public function index(Request $request, KernelInterface $kernel, TranslatorInterface $translator)
     {
-        return $this->render('default/index.html.twig');
+        return $this->render('default/index.html.twig', [
+            'modules' => $this->getModules($kernel, $translator),
+        ]);
     }
 
     /**
@@ -78,8 +80,15 @@ class DefaultController extends AbstractController
      */
     public function menu(Request $request, KernelInterface $kernel, TranslatorInterface $translator)
     {
+        return $this->render('default/include/menu.html.twig', [
+            'modules' => $this->getModules($kernel, $translator),
+        ]);
+    }
+
+    private function getModules(KernelInterface $kernel, TranslatorInterface $translator): array
+    {
         $modules = [];
-        
+
         foreach ($kernel->getBundles() as $bundle) {
             if ($bundle instanceof \Novosga\Module\ModuleInterface) {
                 $displayName = $translator->trans(
@@ -102,9 +111,7 @@ class DefaultController extends AbstractController
         usort($modules, function ($a, $b) {
             return strcasecmp($a['displayName'], $b['displayName']);
         });
-        
-        return $this->render('default/include/menu.html.twig', [
-            'modules' => $modules,
-        ]);
+
+        return $modules;
     }
 }

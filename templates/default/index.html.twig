@@ -12,6 +12,25 @@
             </p>
         </div>
     </div>
+
+    {% set unidade = app.user.lotacao ? app.user.lotacao.unidade : null %}
+
+    {% if unidade %}
+        <div class="container">
+            <div class="row home-modules">
+                {% for module in modules %}
+                    {% if app.user.admin or is_granted(module.roleName) %}
+                        <div class="col-md-3 col-sm-4 col-xs-6">
+                            <a href="{{ path(module.homeRoute) }}" class="btn btn-outline-secondary btn-block home-module-btn">
+                                <i class="fa fa-{{ module.iconName }} fa-2x"></i>
+                                <span>{{ module.displayName }}</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block stylesheets %}
@@ -19,6 +38,20 @@
     <style>
         body>section {
             padding: 20px 0;
+        }
+        .home-modules {
+            margin-top: 20px;
+        }
+        .home-module-btn {
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .home-module-btn span {
+            margin-top: 10px;
         }
     </style>
 {% endblock %}
