@@ -1,0 +1,469 @@
+{#
+  Override local de vendor/novosga/settings-bundle/Resources/views/default/index.html.twig
+
+  Motivo: adicionar o botão "Vincular todos os serviços da unidade" na aba
+  Atendimento (ver função vincularTodosServicos no final do arquivo).
+
+  Se o pacote novosga/settings-bundle for atualizado no futuro, este arquivo
+  precisa ser resincronizado manualmente com a versão nova do vendor -
+  sobrescritas de template do Symfony não herdam mudanças automaticamente.
+#}
+{% extends "@NovosgaSettings/base.html.twig" %}
+
+{% trans_default_domain 'NovosgaSettingsBundle' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>
+                <i class="fa fa-wrench" aria-hidden="true"></i>
+                {{ 'title'|trans }}
+                <small>
+                    {{ 'subtitle'|trans }}
+                </small>
+            </h1>
+        </div>
+    </div>
+
+    <hr>
+
+    <div id="settings">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a href="#tab-servicos" data-toggle="tab" class="nav-link active">
+                    {% trans %}Serviços{% endtrans %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#tab-triagem" data-toggle="tab" class="nav-link">
+                    {% trans %}Triagem{% endtrans %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#tab-atendimento" data-toggle="tab" class="nav-link">
+                    {% trans %}Atendimento{% endtrans %}
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div id="tab-servicos" class="tab-pane active">
+                <table class="table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th class="ativo">
+                                {% trans %}Ativo{% endtrans %}
+                            </th>
+                            <th class="sigla">
+                                {% trans %}Sigla{% endtrans %}
+                            </th>
+                            <th>
+                                {% trans %}Serviço{% endtrans %}
+                            </th>
+                            <th>
+                                {% trans %}Departamento{% endtrans %}
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody v-cloak>
+                        <tr v-for="su in servicosUnidade">
+                            <td class="text-center">
+                                {{ form_widget(inlineForm.ativo, { label: false, attr: { 'v-model': 'su.ativo', 'v-on:change': 'updateServico(su)' } }) }}
+                            </td>
+                            <td>
+                                {{ form_row(inlineForm.sigla, { label: false, attr: { 'v-model': 'su.sigla', 'v-on:input': 'uppercase(su)', 'v-on:blur': 'updateServico(su)', 'v-bind:disabled': '!su.ativo' } }) }}
+                            </td>
+                            <td>
+                                {% verbatim %}
+                                    {{su.servico.nome}}
+                                {% endverbatim %}
+                            </td>
+                            <td>
+                                {{ form_row(inlineForm.departamento, { label: false, attr: { 'v-model': 'su.departamento', 'v-on:change': 'updateServico(su)', 'v-bind:disabled': '!su.ativo' } }) }}
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="btn btn-secondary" v-on:click="showModal(su)">
+                                    <i class="fa fa-cog"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger" v-on:click="removeServicoUnidade(su)" v-bind:disabled="su.ativo">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="text-right">
+                                <button type="button" class="btn btn-primary" v-on:click="showServicos">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div id="tab-triagem" class="tab-pane">
+                <div class="row">
+                    <div class="col-lg-7">
+                        {{ form_start(impressaoForm, { attr: { 'v-on:submit.prevent': 'updateImpressao' } }) }}
+                        <div class="card">
+                            <div class="card-header">
+                                {% trans %}Impressão{% endtrans %}
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-7">
+                                        {{ form_row(impressaoForm.cabecalho, { label: 'Cabeçalho', attr: { 'v-model': 'impressao.cabecalho' } }) }}
+
+                                        {{ form_row(impressaoForm.rodape, { label: 'Rodapé', attr: { 'v-model': 'impressao.rodape' } }) }}
+                                    </div>
+                                    <div class="col-5">
+                                        <label>Layout</label>
+
+                                        {{ form_row(impressaoForm.exibirData, { label: 'Exibir data', attr: { 'v-model': 'impressao.exibirData' } }) }}
+
+                                        {{ form_row(impressaoForm.exibirPrioridade, { label: 'Exibir prioridade', attr: { 'v-model': 'impressao.exibirPrioridade' } }) }}
+
+                                        {{ form_row(impressaoForm.exibirNomeUnidade, { label: 'Exibir nome da unidade', attr: { 'v-model': 'impressao.exibirNomeUnidade' } }) }}
+
+                                        {{ form_row(impressaoForm.exibirNomeServico, { label: 'Exibir nome do serviço', attr: { 'v-model': 'impressao.exibirNomeServico' } }) }}
+
+                                        {{ form_row(impressaoForm.exibirMensagemServico, { label: 'Exibir mensagem do serviço', attr: { 'v-model': 'impressao.exibirMensagemServico' } }) }}
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-save"></i>
+                                    {% trans %}Salvar configuração de impressão{% endtrans %}
+                                </button>
+                            </div>
+                        </div>
+                        {{ form_end(impressaoForm) }}
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card">
+                            <div class="card-header text-white bg-danger">
+                                <i class="fa fa-warning"></i>
+                                {% trans %}Zona de perigo{% endtrans %}
+                            </div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {% trans %}Serviço{% endtrans %}
+                                        </th>
+                                        <th>
+                                            {% trans %}Número atual{% endtrans %}
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="su in servicosUnidade">
+                                        <td class="nome">
+                                            {%- verbatim -%}
+                                                {{su.sigla}} - {{su.servico.nome}}
+                                            {%- endverbatim -%}
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" disabled
+                                                   v-bind:value="contadores[su.servico.id]">
+                                        </td>
+                                        <td class="text-right">
+                                            <button type="button" class="btn btn-secondary" title="{% trans %}Reiniciar contagem do serviço{% endtrans %}"
+                                                    v-on:click="reiniciarContator(su.servico.id)">
+                                                <i class="fa fa-refresh"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <button class="btn btn-danger btn-block" v-on:click="reiniciarSenhas">
+                                                <i class="fa fa-refresh"></i>
+                                                {% trans %}Reiniciar todas senhas{% endtrans %}
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <div class="help-block" style="margin-top:0">Move todos os atendimentos para o histórico e reinicia a contagem de todos serviços.</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <button class="btn btn-danger btn-block" v-on:click="limparSenhas">
+                                                <i class="fa fa-trash"></i>
+                                                {% trans %}Limpar dados{% endtrans %}
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <div class="help-block" style="margin-top:0">Remover todo histórico de atendimentos da unidade.</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-atendimento" class="tab-pane">
+                <div class="row">
+                    <div class="col-md-4 col-sm-6 col-xs-12" v-for="usuario in usuarios">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                {% verbatim %}
+                                    {{ usuario.nome }} ({{ usuario.login }})
+                                {% endverbatim %}
+                            </div>
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th>
+                                            {% trans %}Local{% endtrans %}
+                                        </th>
+                                        <td>
+                                            <select class="form-control" v-model="usuario.local" v-on:change="updateUsuario(usuario)">
+                                                {% for local in locais %}
+                                                    <option value="{{ local.id }}">{{ local.nome }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            {% trans %}Número do local{% endtrans %}
+                                        </th>
+                                        <td>
+                                            <input type="number" class="form-control" v-model="usuario.numero" v-on:change="updateUsuario(usuario)">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            {% trans %}Tipo de atendimento{% endtrans %}
+                                        </th>
+                                        <td>
+                                            <select class="form-control" v-model="usuario.tipoAtendimento" v-on:change="updateUsuario(usuario)">
+                                                {% for k, v in tiposAtendimento %}
+                                                <option value="{{k}}">{{v}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {% trans %}Serviço{% endtrans %}
+                                        </th>
+                                        <th>
+                                            {% trans %}Peso{% endtrans %}
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="servicoUsuario in usuario.servicos">
+                                        <td>
+                                            {% verbatim %}
+                                                {{ servicoUsuario.sigla }} - {{ servicoUsuario.nome }}
+                                            {% endverbatim %}
+                                        </td>
+                                        <td style="width: 100px">
+                                            <input type="number" class="form-control" v-model="servicoUsuario.peso" v-on:change="updateServicoUsuario(usuario, servicoUsuario)">
+                                        </td>
+                                        <td class="text-right">
+                                            <button type="button" class="btn btn-danger" v-on:click="removeServicoUsuario(usuario, servicoUsuario)">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="usuario.servicos.length === 0">
+                                        <td colspan="2" class="text-muted">
+                                            {% trans %}Nenhum serviço{% endtrans %}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="panel-footer">
+                                <div class="input-group">
+                                    <select class="form-control" v-model="servicoUsuario[usuario.id]">
+                                        <option v-for="servicoUnidade in availableServices[usuario.id]" v-bind:value="servicoUnidade">
+                                            {% verbatim %}
+                                                {{ servicoUnidade.sigla }} - {{ servicoUnidade.servico.nome }}
+                                            {% endverbatim %}
+                                        </option>
+                                    </select>
+
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-secondary" type="button" v-on:click="addServicoUsuario(usuario)">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                                <button type="button" class="btn btn-outline-secondary btn-block mt-2"
+                                        v-on:click="vincularTodosServicos(usuario.id, $event)">
+                                    <i class="fa fa-check-double"></i>
+                                    {% trans %}Vincular todos os serviços da unidade{% endtrans %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dialog-servicos" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ 'label.services'|trans }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="search" class="form-search form-control" placeholder="{{ 'label.search'|trans }}" v-model="servicosSearch">
+                        </div>
+                        <div class="checkbox" v-for="servico in servicos" v-if="servico.nome.toUpperCase().indexOf(servicosSearch.toUpperCase()) !== -1 || servico.descricao.toUpperCase().indexOf(servicosSearch.toUpperCase()) !== -1">
+                            <label>
+                                <input type="checkbox" v-model="servico.checked">
+                                {% verbatim %}
+                                    {{ servico.nome }}
+                                {% endverbatim %}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ 'button.close'|trans }}</button>
+                        <button type="button" class="btn btn-primary" type="button" v-on:click="addServicos">
+                            {{ 'button.add'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dialog-servico-unidade" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    {{ form_start(form, { attr: { 'v-on:submit.prevent': 'updateServicoFromModal' } }) }}
+                        <div class="modal-header">
+                            <h5 class="modal-title">{% trans %}Serviço{% endtrans %}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        </div>
+                        <div class="modal-body" v-if="servicoUnidade">
+                            {{ form_row(form.ativo, { label: 'label.enabled'|trans, attr: { 'v-model': 'servicoUnidade.ativo' } }) }}
+                            <fieldset>
+                                <legend>{% trans %}Triagem{% endtrans %}</legend>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-7">
+                                                {{ form_row(form.sigla, { attr: { 'v-model': 'servicoUnidade.sigla', 'v-on:input': 'uppercase(servicoUnidade)' } }) }}
+                                            </div>
+                                            <div class="col-5">
+                                                {{ form_row(form.peso, { attr: { 'v-model': 'servicoUnidade.peso' } }) }}
+                                            </div>
+                                        </div>
+
+                                        {{ form_row(form.tipo, { label: 'label.attendance_type'|trans, attr: { 'v-model': 'servicoUnidade.tipo' } }) }}
+
+                                        {{ form_row(form.departamento, { attr: { 'v-model': 'servicoUnidade.departamento' } }) }}
+                                    </div>
+                                    <div class="col-6">
+                                        {{ form_row(form.mensagem, { attr: { 'v-model': 'servicoUnidade.mensagem', rows: 10 } }) }}
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>{% trans %}Contador{% endtrans %}</legend>
+                                <div class="row">
+                                    <div class="col-3">
+                                        {{ form_row(form.numeroInicial, { attr: { 'v-model': 'servicoUnidade.numeroInicial' } }) }}
+                                    </div>
+                                    <div class="col-3">
+                                        {{ form_row(form.numeroFinal, { attr: { 'v-model': 'servicoUnidade.numeroFinal' } }) }}
+                                    </div>
+                                    <div class="col-3">
+                                        {{ form_row(form.incremento, { attr: { 'v-model': 'servicoUnidade.incremento' } }) }}
+                                    </div>
+                                    <div class="col-3">
+                                        {{ form_row(form.maximo, { attr: { 'v-model': 'servicoUnidade.maximo' } }) }}
+                                    </div>
+                            </fieldset>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                {% trans %}Cancelar{% endtrans %}
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save"></i>
+                                {% trans %}Salvar{% endtrans %}
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        {# reiniciar #}
+        <div id="dialog-reiniciar" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{% trans %}Configuração{% endtrans %}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>{% trans %}Senhas reiniciadas com sucesso{% endtrans %}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans %}Fechar{% endtrans %}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        var usuarios              = {{ usuarios|json_encode()|raw }},
+            impressao             = {{ unidade.impressao|json_encode()|raw }},
+            usuario               = {{ usuario|json_encode()|raw }},
+            unidade               = {{ unidade|json_encode()|raw }},
+            desejaReiniciarSenhas = '{% trans %}Deseja realmente reiniciar as senhas?{% endtrans %}',
+            desejaReiniciar       = '{% trans %}Deseja realmente reiniciar o contador?{% endtrans %}',
+            desejaLimparDados     = '{% trans %}Deseja realmente limpar os dados de atendimento?{% endtrans %}';
+    </script>
+    <script type="text/javascript" src="{{ asset('bundles/novosgasettings/js/script.js') }}"></script>
+    <script>
+        function vincularTodosServicos (usuarioId, event) {
+            var btn = event.currentTarget
+            btn.disabled = true
+
+            var url = '{{ path('novosga_settings_vincular_todos_servicos', { id: 0 }) }}'.replace('/0', '/' + usuarioId)
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            }).then(function (response) {
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status)
+                }
+                window.location.reload()
+            }).catch(function (e) {
+                alert('{% trans %}Não foi possível vincular os serviços.{% endtrans %} (' + e.message + ')')
+                btn.disabled = false
+            })
+        }
+    </script>
+{% endblock %}
