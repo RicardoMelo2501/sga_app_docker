@@ -23,7 +23,11 @@ security:
         oauth_token:
            pattern:    ^/api/token
            security:   false
-            
+
+        pareamento:
+           pattern:    ^/api/pareamento
+           security:   false
+
         api:
            pattern:    ^/(api|\w+\.\w+/api)
            fos_oauth:  true
