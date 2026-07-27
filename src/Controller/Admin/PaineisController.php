@@ -143,7 +143,7 @@ class PaineisController extends AbstractController
         $data = json_decode($response->getContent(), true);
 
         $painel = new PainelDisplay();
-        $painel->setId(bin2hex(random_bytes(16)));
+        $painel->setId($this->generateId($em));
         $painel->setNome($nome);
         $painel->setUnidade($unidade);
         $painel->setServicos(array_values(array_map('intval', $servicos)));
@@ -159,7 +159,55 @@ class PaineisController extends AbstractController
     }
 
     /**
-     * @Route("/api/{id}", name="admin_paineis_remove", methods={"DELETE"}, requirements={"id"="[a-f0-9]{32}"})
+     * @Route("/api/{id}", name="admin_paineis_edit", methods={"PUT"}, requirements={"id"="[0-9]{1,10}"})
+     */
+    public function edit(string $id, Request $request)
+    {
+        $envelope = new Envelope();
+        $em = $this->getDoctrine()->getManager();
+        $painel = $em->getRepository(PainelDisplay::class)->find($id);
+
+        if (!$painel) {
+            throw new Exception('Painel não encontrado.');
+        }
+
+        $json = json_decode($request->getContent());
+
+        $nome = isset($json->nome) ? trim($json->nome) : '';
+        $unidadeId = $json->unidade ?? null;
+        $servicos = $json->servicos ?? [];
+
+        if ($nome === '') {
+            throw new Exception('Informe um nome para o painel.');
+        }
+
+        if (!$unidadeId) {
+            throw new Exception('Selecione a unidade.');
+        }
+
+        if (empty($servicos)) {
+            throw new Exception('Selecione ao menos um serviço.');
+        }
+
+        $unidade = $em->getRepository(Unidade::class)->find($unidadeId);
+
+        if (!$unidade) {
+            throw new Exception('Unidade inválida.');
+        }
+
+        $painel->setNome($nome);
+        $painel->setUnidade($unidade);
+        $painel->setServicos(array_values(array_map('intval', $servicos)));
+
+        $em->flush();
+
+        $envelope->setData($painel);
+
+        return $this->json($envelope);
+    }
+
+    /**
+     * @Route("/api/{id}", name="admin_paineis_remove", methods={"DELETE"}, requirements={"id"="[0-9]{1,10}"})
      */
     public function remove(string $id)
     {
@@ -184,6 +232,17 @@ class PaineisController extends AbstractController
         $envelope->setData($painel);
 
         return $this->json($envelope);
+    }
+
+    private function generateId(\Doctrine\ORM\EntityManagerInterface $em): string
+    {
+        $repo = $em->getRepository(PainelDisplay::class);
+
+        do {
+            $id = (string) random_int(1, 9999999999);
+        } while ($repo->find($id) !== null);
+
+        return $id;
     }
 
     private function getSystemClient(ClientManagerInterface $clientManager): OAuthClient

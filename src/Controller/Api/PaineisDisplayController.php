@@ -35,7 +35,7 @@ class PaineisDisplayController extends AbstractController
     private const SYSTEM_CLIENT_DESCRIPTION = 'painel-display-system';
 
     /**
-     * @Route("/{id}/token", methods={"GET"}, requirements={"id"="[a-f0-9]{32}"})
+     * @Route("/{id}/token", methods={"GET"}, requirements={"id"="[0-9]{1,10}"})
      */
     public function token(string $id, OAuth2 $oauth2Server): JsonResponse
     {

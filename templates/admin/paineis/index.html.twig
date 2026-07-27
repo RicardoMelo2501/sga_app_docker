@@ -38,6 +38,10 @@
                         </td>
                         {% endverbatim %}
                         <td class="text-center">
+                            <button type="button" class="btn btn-secondary" title="{{ 'button.edit'|trans }}"
+                                    v-on:click.prevent="editPainel(painel)">
+                                <span class="fa fa-pencil"></span>
+                            </button>
                             <button type="button" class="btn btn-danger" title="{{ 'button.remove'|trans }}"
                                     v-on:click.prevent="removePainel(painel)">
                                 <span class="fa fa-trash"></span>
@@ -64,9 +68,10 @@
         <div id="dialog-painel" class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <form v-on:submit.prevent="addPainel">
+                    <form v-on:submit.prevent="savePainel">
                         <div class="modal-header">
-                            <h5 class="modal-title">{{ 'admin.paineis.modal.title'|trans }}</h5>
+                            <h5 class="modal-title" v-if="!editing">{{ 'admin.paineis.modal.title'|trans }}</h5>
+                            <h5 class="modal-title" v-if="editing">{{ 'admin.paineis.modal.title_edit'|trans }}</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -99,18 +104,20 @@
                                 </div>
                             </div>
 
-                            <hr>
+                            <div v-if="!editing">
+                                <hr>
 
-                            <p class="text-muted">{{ 'admin.paineis.field.credentials_hint'|trans }}</p>
+                                <p class="text-muted">{{ 'admin.paineis.field.credentials_hint'|trans }}</p>
 
-                            <div class="form-group">
-                                <label>{{ 'admin.paineis.field.username'|trans }}</label>
-                                <input type="text" class="form-control" v-model="painel.username" required>
-                            </div>
+                                <div class="form-group">
+                                    <label>{{ 'admin.paineis.field.username'|trans }}</label>
+                                    <input type="text" class="form-control" v-model="painel.username" required>
+                                </div>
 
-                            <div class="form-group">
-                                <label>{{ 'admin.paineis.field.password'|trans }}</label>
-                                <input type="password" class="form-control" v-model="painel.password" required>
+                                <div class="form-group">
+                                    <label>{{ 'admin.paineis.field.password'|trans }}</label>
+                                    <input type="password" class="form-control" v-model="painel.password" required>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -118,7 +125,7 @@
                                 {{ 'button.close'|trans }}
                             </button>
                             <button type="submit" class="btn btn-primary">
-                                {{ 'button.add'|trans }}
+                                {{ 'button.save'|trans }}
                             </button>
                         </div>
                     </form>
@@ -140,7 +147,8 @@
                     painel: {},
                     paineis: [],
                     unidades: {{ unidades|json_encode|raw }},
-                    servicos: []
+                    servicos: [],
+                    editing: false
                 },
                 methods: {
                     load: function () {
@@ -155,29 +163,55 @@
                     newPainel: function () {
                         this.painel = { servicos: [] }
                         this.servicos = []
+                        this.editing = false
                         $('#dialog-painel').modal('show')
                     },
-                    loadServicos: function () {
+                    editPainel: function (painel) {
                         var self = this
-                        self.painel.servicos = []
+                        self.painel = {
+                            id: painel.id,
+                            nome: painel.nome,
+                            unidade: painel.unidade ? painel.unidade.id : null,
+                            servicos: (painel.servicos || []).slice()
+                        }
                         self.servicos = []
+                        self.editing = true
 
-                        if (!self.painel.unidade) {
-                            return
+                        if (self.painel.unidade) {
+                            self.fetchServicos(self.painel.unidade)
                         }
 
+                        $('#dialog-painel').modal('show')
+                    },
+                    fetchServicos: function (unidadeId) {
+                        var self = this
                         App.ajax({
-                            url: '{{ path('admin_paineis_index') }}api/unidades/' + self.painel.unidade + '/servicos',
+                            url: '{{ path('admin_paineis_index') }}api/unidades/' + unidadeId + '/servicos',
                             success: function (response) {
                                 self.servicos = response.data
                             }
                         })
                     },
-                    addPainel: function () {
+                    loadServicos: function () {
+                        this.painel.servicos = []
+                        this.servicos = []
+
+                        if (!this.painel.unidade) {
+                            return
+                        }
+
+                        this.fetchServicos(this.painel.unidade)
+                    },
+                    savePainel: function () {
                         var self = this
+                        var url = self.editing
+                            ? ('{{ path('admin_paineis_list') }}/' + self.painel.id)
+                            : '{{ path('admin_paineis_new') }}'
+                        var method = self.editing ? 'PUT' : 'POST'
+
                         App.ajax({
-                            url: '{{ path('admin_paineis_new') }}',
-                            type: 'POST',
+                            url: url,
+                            type: method,
                             data: self.painel,
                             success: function () {
                                 self.load()

@@ -798,6 +798,14 @@
                 <source>admin.paineis.remove_alert</source>
                 <target>Do you really want to remove this panel? The device using it will immediately lose access.</target>
             </trans-unit>
+            <trans-unit id="admin.paineis.modal.title_edit">
+                <source>admin.paineis.modal.title_edit</source>
+                <target>Edit panel</target>
+            </trans-unit>
+            <trans-unit id="button.edit">
+                <source>button.edit</source>
+                <target>Edit</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

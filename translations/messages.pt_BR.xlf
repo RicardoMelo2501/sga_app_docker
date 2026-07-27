@@ -658,6 +658,14 @@
                 <source>admin.paineis.remove_alert</source>
                 <target>Deseja realmente remover este painel? O dispositivo que o utiliza perderá o acesso imediatamente.</target>
             </trans-unit>
+            <trans-unit id="admin.paineis.modal.title_edit">
+                <source>admin.paineis.modal.title_edit</source>
+                <target>Editar painel</target>
+            </trans-unit>
+            <trans-unit id="button.edit">
+                <source>button.edit</source>
+                <target>Editar</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
