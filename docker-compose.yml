@@ -13,11 +13,10 @@ services:
       APP_ENV: prod
       APP_SECRET: ${APP_SECRET:-7b5317ebb2893d0420cfa65875453eca}
       APP_LANGUAGE: ${APP_LANGUAGE:-pt_BR}
-      LANGUAGE: ${LANGUAGE:-pt_BR}
       DATABASE_URL: "mysql://novosga:novosga@db:3306/novosga?serverVersion=8.0&charset=utf8mb4"
       DATABASE_HOST: db
       DATABASE_PORT: 3306
-      MERCURE_PUBLIC_URL: http://localhost:3001/.well-known/mercure
+      MERCURE_PUBLIC_URL: http://mercure/.well-known/mercure
       MERCURE_JWT_TOKEN: ${MERCURE_JWT_TOKEN:-eyJhbGciOiJIUzI1NiJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOlsiKiJdfX0.vhMwOaN5K68BTIhWokMLOeOJO4EPfT64brd8euJOA4M}
       MERCURE_CONSUMER_URL: /.well-known/mercure
       CORS_ALLOW_ORIGIN: "^https?://localhost(:[0-9]+)?$$"
