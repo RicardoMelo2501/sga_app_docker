@@ -1,0 +1,74 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - db
+      - mercure
+    ports:
+      - "8080:80"
+    environment:
+      APP_ENV: prod
+      APP_SECRET: ${APP_SECRET:-7b5317ebb2893d0420cfa65875453eca}
+      APP_LANGUAGE: ${APP_LANGUAGE:-pt_BR}
+      LANGUAGE: ${LANGUAGE:-pt_BR}
+      DATABASE_URL: "mysql://novosga:novosga@db:3306/novosga?serverVersion=8.0&charset=utf8mb4"
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      MERCURE_PUBLIC_URL: http://localhost:3001/.well-known/mercure
+      MERCURE_JWT_TOKEN: ${MERCURE_JWT_TOKEN:-eyJhbGciOiJIUzI1NiJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOlsiKiJdfX0.vhMwOaN5K68BTIhWokMLOeOJO4EPfT64brd8euJOA4M}
+      MERCURE_CONSUMER_URL: /.well-known/mercure
+      CORS_ALLOW_ORIGIN: "^https?://localhost(:[0-9]+)?$$"
+      NOVOSGA_ADMIN_USERNAME: ${NOVOSGA_ADMIN_USERNAME:-admin}
+      NOVOSGA_ADMIN_PASSWORD: ${NOVOSGA_ADMIN_PASSWORD:-admin123}
+      NOVOSGA_ADMIN_FIRSTNAME: ${NOVOSGA_ADMIN_FIRSTNAME:-Administrator}
+      NOVOSGA_ADMIN_LASTNAME: ${NOVOSGA_ADMIN_LASTNAME:-Global}
+      NOVOSGA_UNITY_NAME: ${NOVOSGA_UNITY_NAME:-Unidade padrão}
+      NOVOSGA_UNITY_DESCRIPTION: ${NOVOSGA_UNITY_DESCRIPTION:-UNI1}
+      NOVOSGA_NOPRIORITY_NAME: ${NOVOSGA_NOPRIORITY_NAME:-Normal}
+      NOVOSGA_NOPRIORITY_DESCRIPTION: ${NOVOSGA_NOPRIORITY_DESCRIPTION:-Sem prioridade}
+      NOVOSGA_PRIORITY_NAME: ${NOVOSGA_PRIORITY_NAME:-Prioridade}
+      NOVOSGA_PRIORITY_DESCRIPTION: ${NOVOSGA_PRIORITY_DESCRIPTION:-Atendimento prioritário}
+      NOVOSGA_PLACE_NAME: ${NOVOSGA_PLACE_NAME:-Guichê}
+    volumes:
+      - app_var:/var/www/html/var
+    networks:
+      - novosga
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-novosga_root}
+      MYSQL_USER: novosga
+      MYSQL_PASSWORD: novosga
+      MYSQL_DATABASE: novosga
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - novosga
+
+  mercure:
+    image: dunglas/mercure
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    environment:
+      SERVER_NAME: ":80"
+      MERCURE_PUBLISHER_JWT_KEY: "!ChangeMe!"
+      MERCURE_SUBSCRIBER_JWT_KEY: "!ChangeMe!"
+      MERCURE_EXTRA_DIRECTIVES: |
+        cors_origins http://localhost:8080
+    networks:
+      - novosga
+
+networks:
+  novosga:
+    driver: bridge
+
+volumes:
+  db_data:
+  app_var:
